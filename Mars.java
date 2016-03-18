@@ -28,10 +28,7 @@ public class Mars {
         if (flag) {
             ArrayList<Integer> l = getAnswer(n);
             l.sort((a, b) -> a - b);
-            for (Integer i :
-                    l) {
-                System.out.printf("%s ", i);
-            }
+            l.forEach(i -> System.out.printf("%s ", i));
         } else {
             System.out.println("No solution");
         }
@@ -79,11 +76,7 @@ public class Mars {
 
     private static ArrayList<Integer> getAnswer(int n) {
         ArrayList<Integer> answer = new ArrayList<>(0);
-        int answerSize = 0;
-        for (Component c :
-                result) {
-            answerSize += c.pluses.size();
-        }
+        int answerSize = result.stream().mapToInt(x -> x.pluses.size()).reduce(0, (r, x) -> r + x);
         if (answerSize < n / 2) {
             List<Integer> l = alone.subList(0, n / 2 - answerSize);
             answer.addAll(l);

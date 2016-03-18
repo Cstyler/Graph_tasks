@@ -41,15 +41,8 @@ public class MaxComponent {
     }
 
     private static void removeNotMax(ArrayList<Component> components, Key key) {
-        int maxCount = key.getKey(components.get(0));
-        for (Component c :
-                components) {
-            if (key.getKey(c) >= maxCount) {
-                maxCount = key.getKey(c);
-            }
-        }
-        final int maxCount2 = maxCount;
-        components.removeIf(a -> key.getKey(a) != maxCount2);
+        final int maxCount = key.getKey(components.stream().max((a,b)->key.getKey(a)-key.getKey(b)).get());
+        components.removeIf(a -> key.getKey(a) != maxCount);
     }
 
     interface Key {
@@ -68,13 +61,7 @@ public class MaxComponent {
         System.out.println("\t" + vertexIndex + tag);
         for (int j = 0; j < vertex.edges.size(); j++) {
             int u = vertex.edges.get(j);
-            System.out.println("\t" + vertexIndex + " -- " + u + tag + "\n\t" + u + tag);
-            if (vertices[u] != vertex) {
-                vertices[u].edges.remove(vertices[u].edges.indexOf(vertexIndex));
-            } else {
-                vertex.edges.remove(vertex.edges.indexOf(vertexIndex));
-                j--;
-            }
+            if(vertexIndex <= u) System.out.println("\t" + vertexIndex + " -- " + u + tag + "\n\t" + u + tag);
         }
     }
 }
