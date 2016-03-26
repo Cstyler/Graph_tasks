@@ -63,31 +63,29 @@ class Vertex {
     private int key;
     private Marks mark;
 
-    public enum Marks {IN_QUEUE, IN_TREE, OUT_TREE}
-
-    public Vertex() {
+    Vertex() {
         mark = Marks.OUT_TREE;
         key = 0;
         edges = new ArrayList<>(0);
     }
 
-    public void setMark(Marks mark) {
-        this.mark = mark;
-    }
-
-    public Marks getMark() {
+    Marks getMark() {
         return mark;
     }
 
-    public void setKey(int key) {
-        this.key = key;
+    void setMark(Marks mark) {
+        this.mark = mark;
     }
 
-    public int getKey() {
+    int getKey() {
         return key;
     }
 
-    public ArrayList<Edge> getEdges() {
+    void setKey(int key) {
+        this.key = key;
+    }
+
+    ArrayList<Edge> getEdges() {
         return edges;
     }
 
@@ -95,21 +93,23 @@ class Vertex {
     public String toString() {
         return edges.toString();
     }
+
+    enum Marks {IN_QUEUE, IN_TREE, OUT_TREE}
 }
 
 class Edge {
     private final int vertex, key;
 
-    public Edge(int vertex, int key) {
+    Edge(int vertex, int key) {
         this.vertex = vertex;
         this.key = key;
     }
 
-    public int getVertex() {
+    int getVertex() {
         return vertex;
     }
 
-    public int getKey() {
+    int getKey() {
         return key;
     }
 

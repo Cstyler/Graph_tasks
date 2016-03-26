@@ -2,11 +2,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * Created by khan on 12.03.16. BridgeNum
- */
-
-public class BridgeNum {
+class BridgeNum {
     private static int edgeNum;
 
     public static void main(String[] args) {
@@ -21,10 +17,10 @@ public class BridgeNum {
         for (int i = 0; i < comp + 1; i++) {
             for (Vertex v :
                     vertices) {
-                if (v.comp == i) {
+                if (v.getComp() == i) {
                     for (Integer index :
-                            v.edges) {
-                        if (vertices[index].comp == i) {
+                            v.getEdges()) {
+                        if (vertices[index].getComp() == i) {
                             edgeCount++;
                         }
                     }
@@ -44,9 +40,9 @@ public class BridgeNum {
         }
         for (int i = 0; i < m; i++) {
             int a = scn.nextInt(), b = scn.nextInt();
-            vertices[a].edges.add(b);
+            vertices[a].getEdges().add(b);
             if (b != a) {
-                vertices[b].edges.add(a);
+                vertices[b].getEdges().add(a);
             }
         }
         return vertices;
@@ -57,39 +53,39 @@ class Graph {
     private final Vertex[] vertices;
     private final ArrayDeque<Vertex> deque;
 
-    public Graph(Vertex[] vertices) {
+    Graph(Vertex[] vertices) {
         deque = new ArrayDeque<>();
         this.vertices = vertices;
     }
 
-    public void DFS1() {
+    void DFS1() {
         for (Vertex v :
                 vertices) {
-            if (v.mark == Vertex.Marks.WHITE) {
+            if (v.getMark() == Vertex.Marks.WHITE) {
                 visitVertex1(v);
             }
         }
     }
 
     private void visitVertex1(Vertex vertex) {
-        vertex.mark = Vertex.Marks.GRAY;
+        vertex.setMark(Vertex.Marks.GRAY);
         deque.addLast(vertex);
         for (Integer i :
-                vertex.edges) {
+                vertex.getEdges()) {
             Vertex u = vertices[i];
-            if (u.mark == Vertex.Marks.WHITE) {
-                u.parent = vertex;
+            if (u.getMark() == Vertex.Marks.WHITE) {
+                u.setParent(vertex);
                 visitVertex1(u);
             }
         }
-        vertex.mark = Vertex.Marks.BLACK;
+        vertex.setMark(Vertex.Marks.BLACK);
     }
 
-    public int DFS2() {
+    int DFS2() {
         int component = 0;
         while (!deque.isEmpty()) {
             Vertex v = deque.pollFirst();
-            if (v.comp == -1) {
+            if (v.getComp() == -1) {
                 visitVertex2(v, component++);
             }
         }
@@ -97,11 +93,11 @@ class Graph {
     }
 
     private void visitVertex2(Vertex vertex, int component) {
-        vertex.comp = component;
+        vertex.setComp(component);
         for (Integer i :
-                vertex.edges) {
+                vertex.getEdges()) {
             Vertex u = vertices[i];
-            if (u.comp == -1 && u.parent != vertex) {
+            if (u.getComp() == -1 && u.getParent() != vertex) {
                 visitVertex2(u, component);
             }
         }
@@ -109,17 +105,45 @@ class Graph {
 }
 
 class Vertex {
-    public Marks mark;
-    public final ArrayList<Integer> edges;
-    public int comp;
-    public Vertex parent;
+    private final ArrayList<Integer> edges;
+    private Marks mark;
+    private int comp;
+    private Vertex parent;
 
-    enum Marks {WHITE, GRAY, BLACK}
-
-    public Vertex() {
-        comp = -1;
-        parent = null;
-        mark = Marks.WHITE;
+    Vertex() {
+        setComp(-1);
+        setParent(null);
+        setMark(Marks.WHITE);
         edges = new ArrayList<>(0);
     }
+
+    Marks getMark() {
+        return mark;
+    }
+
+    void setMark(Marks mark) {
+        this.mark = mark;
+    }
+
+    ArrayList<Integer> getEdges() {
+        return edges;
+    }
+
+    int getComp() {
+        return comp;
+    }
+
+    void setComp(int comp) {
+        this.comp = comp;
+    }
+
+    Vertex getParent() {
+        return parent;
+    }
+
+    void setParent(Vertex parent) {
+        this.parent = parent;
+    }
+
+    enum Marks {WHITE, GRAY, BLACK}
 }

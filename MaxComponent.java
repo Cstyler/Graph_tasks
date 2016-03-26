@@ -5,7 +5,7 @@ import java.util.Scanner;
  * Created by khan on 12.03.16. MaxComponent
  */
 
-public class MaxComponent {
+class MaxComponent {
     public static void main(String[] args) {
         getAnswer(scanInput());
     }
@@ -19,9 +19,9 @@ public class MaxComponent {
         }
         for (int i = 0; i < m; i++) {
             int a = scn.nextInt(), b = scn.nextInt();
-            vertices[a].edges.add(b);
+            vertices[a].getEdges().add(b);
             if (b != a) {
-                vertices[b].edges.add(a);
+                vertices[b].getEdges().add(a);
             }
         }
         return vertices;
@@ -35,34 +35,37 @@ public class MaxComponent {
 
     private static int getMaxComponentIndex(ArrayList<Component> componentArray) {
         @SuppressWarnings("unchecked") ArrayList<Component> temp = (ArrayList<Component>) componentArray.clone();
-        removeNotMax(temp, a -> a.vertexCount);
-        removeNotMax(temp, a -> a.edgeCount);
+        removeNotMax(temp, Component::getVertexCount);
+        removeNotMax(temp, Component::getEdgeCount);
         return componentArray.indexOf(temp.get(0));
     }
 
     private static void removeNotMax(ArrayList<Component> components, Key key) {
-        final int maxCount = key.getKey(components.stream().max((a,b)->key.getKey(a)-key.getKey(b)).get());
+        @SuppressWarnings("OptionalGetWithoutIsPresent") final int maxCount = key.getKey(components.stream().max((a, b) -> key.getKey(a) - key.getKey(b)).get());
         components.removeIf(a -> key.getKey(a) != maxCount);
-    }
-
-    interface Key {
-        int getKey(Component c);
     }
 
     private static void printAnswer(Vertex[] vertices, int maxComponentIndex) {
         System.out.println("graph {");
+        String redTag = " [color = red]";
         for (int i = 0; i < vertices.length; i++) {
-            printEdgesAndVertices(vertices[i], i, vertices[i].cNum == maxComponentIndex ? " [color = red]" : "", vertices);
+            System.out.printf("\t%d%s\n", i, vertices[i].getcNum() == maxComponentIndex ? redTag : "");
+        }
+        for (int i = 0; i < vertices.length; i++) {
+            printEdgesAndVertices(vertices[i], i, vertices[i].getcNum() == maxComponentIndex ? redTag : "");
         }
         System.out.println("}");
     }
 
-    private static void printEdgesAndVertices(Vertex vertex, int vertexIndex, String tag, Vertex[] vertices) {
-        System.out.println("\t" + vertexIndex + tag);
-        for (int j = 0; j < vertex.edges.size(); j++) {
-            int u = vertex.edges.get(j);
-            if(vertexIndex <= u) System.out.println("\t" + vertexIndex + " -- " + u + tag + "\n\t" + u + tag);
+    private static void printEdgesAndVertices(Vertex vertex, int vertexIndex, String tag) {
+        for (int j = 0; j < vertex.getEdges().size(); j++) {
+            int u = vertex.getEdges().get(j);
+            if (vertexIndex <= u) System.out.println("\t" + vertexIndex + " -- " + u + tag);
         }
+    }
+
+    private interface Key {
+        int getKey(Component c);
     }
 }
 
@@ -70,19 +73,19 @@ class Graph {
     private final ArrayList<Component> componentArray;
     private final Vertex[] vertices;
 
-    public Graph(Vertex[] vertices) {
+    Graph(Vertex[] vertices) {
         this.componentArray = new ArrayList<>(1);
         this.vertices = vertices;
     }
 
-    public ArrayList<Component> getComponentArray() {
+    ArrayList<Component> getComponentArray() {
         return componentArray;
     }
 
-    public void DFS() {
+    void DFS() {
         for (Vertex v :
                 vertices) {
-            if (v.mark == Vertex.Marks.WHITE) {
+            if (v.getMark() == Vertex.Marks.WHITE) {
                 componentArray.add(new Component());
                 visitVertex(v, componentArray.size() - 1);
             }
@@ -90,42 +93,78 @@ class Graph {
     }
 
     private void visitVertex(Vertex v, int componentNum) {
-        v.mark = Vertex.Marks.GRAY;
-        v.cNum = componentNum;
-        componentArray.get(componentNum).edgeCount += v.edges.size();
+        v.setMark(Vertex.Marks.GRAY);
+        v.setcNum(componentNum);
+        componentArray.get(componentNum).setEdgeCount(componentArray.get(componentNum).getEdgeCount() + v.getEdges().size());
         for (Integer i :
-                v.edges) {
+                v.getEdges()) {
             Vertex u = vertices[i];
-            if (u.mark == Vertex.Marks.WHITE) {
-                componentArray.get(componentNum).vertexCount++;
-                u.cNum = componentNum;
+            if (u.getMark() == Vertex.Marks.WHITE) {
+                componentArray.get(componentNum).setVertexCount(componentArray.get(componentNum).getVertexCount() + 1);
+                u.setcNum(componentNum);
                 visitVertex(u, componentNum);
             }
         }
-        v.mark = Vertex.Marks.BLACK;
+        v.setMark(Vertex.Marks.BLACK);
     }
 }
 
 class Vertex {
-    public Marks mark;
-    public final ArrayList<Integer> edges;
-    public int cNum;
+    private final ArrayList<Integer> edges;
+    private Marks mark;
+    private int cNum;
 
-    enum Marks {WHITE, GRAY, BLACK}
-
-    public Vertex() {
-        cNum = 0;
-        mark = Marks.WHITE;
+    Vertex() {
+        setcNum(0);
+        setMark(Marks.WHITE);
         edges = new ArrayList<>(0);
     }
+
+    Marks getMark() {
+        return mark;
+    }
+
+    void setMark(Marks mark) {
+        this.mark = mark;
+    }
+
+    ArrayList<Integer> getEdges() {
+        return edges;
+    }
+
+    int getcNum() {
+        return cNum;
+    }
+
+    void setcNum(int cNum) {
+        this.cNum = cNum;
+    }
+
+    enum Marks {WHITE, GRAY, BLACK}
 }
 
 class Component {
-    public int vertexCount;
-    public int edgeCount;
+    private int vertexCount;
+    private int edgeCount;
 
-    public Component() {
-        this.vertexCount = 1;
-        this.edgeCount = 0;
+    Component() {
+        this.setVertexCount(1);
+        this.setEdgeCount(0);
+    }
+
+    int getVertexCount() {
+        return vertexCount;
+    }
+
+    void setVertexCount(int vertexCount) {
+        this.vertexCount = vertexCount;
+    }
+
+    int getEdgeCount() {
+        return edgeCount;
+    }
+
+    void setEdgeCount(int edgeCount) {
+        this.edgeCount = edgeCount;
     }
 }

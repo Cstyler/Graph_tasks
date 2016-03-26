@@ -6,7 +6,7 @@ import java.util.Scanner;
  * Created by khan on 12.03.16. EqDist
  */
 
-public class EqDist {
+class EqDist {
     private static Vertex[] supportVertices, vertices;
 
     public static void main(String[] args) {
@@ -25,8 +25,8 @@ public class EqDist {
         } else {
             dists
                     .stream()
-                    .sorted((a, b) -> a.index - b.index)
-                    .forEach(x -> System.out.print(x.index + " "));
+                    .sorted((a, b) -> a.getIndex() - b.getIndex())
+                    .forEach(x -> System.out.print(x.getIndex() + " "));
         }
         System.out.println();
     }
@@ -37,7 +37,7 @@ public class EqDist {
             dists.get(i).stream()
                     .flatMap(x -> dists.get(0)
                             .stream()
-                            .filter(y -> y.dist == x.dist && y.index == x.index))
+                            .filter(y -> y.getDist() == x.getDist() && y.getIndex() == x.getIndex()))
                     .forEach(tempArray::add);
             dists.set(0, tempArray);
         }
@@ -53,9 +53,9 @@ public class EqDist {
         }
         for (int i = 0; i < m; i++) {
             int a = scn.nextInt(), b = scn.nextInt();
-            vertices[a].edges.add(b);
+            vertices[a].getEdges().add(b);
             if (b != a) {
-                vertices[b].edges.add(a);
+                vertices[b].getEdges().add(a);
             }
         }
         final int k = scn.nextInt();
@@ -73,46 +73,75 @@ public class EqDist {
             Vertex v = supportVertices[i];
             markedVertices.clear();
             dists.add(new ArrayList<>());
-            v.mark = true;
-            v.dist = 0;
+            v.setMark(true);
+            v.setDist(0);
             deque.addLast(v);
             while (!deque.isEmpty()) {
                 Vertex q = deque.pollFirst();
                 for (Integer uInd :
-                        q.edges) {
+                        q.getEdges()) {
                     Vertex u = vertices[uInd];
-                    if (!u.mark) {
-                        u.dist = q.dist + 1;
-                        u.mark = true;
+                    if (!u.getMark()) {
+                        u.setDist(q.getDist() + 1);
+                        u.setMark(true);
                         markedVertices.add(u);
-                        dists.get(i).add(new Tuple(u.dist, uInd));
+                        dists.get(i).add(new Tuple(u.getDist(), uInd));
                         deque.addLast(u);
                     }
                 }
             }
-            markedVertices.forEach(a -> a.mark = false);
+            markedVertices.forEach(a -> a.setMark(false));
         }
         return dists;
     }
 }
 
 class Vertex {
-    public boolean mark;
-    public final ArrayList<Integer> edges;
-    public int dist;
+    private final ArrayList<Integer> edges;
+    private boolean mark;
+    private int dist;
 
-    public Vertex() {
-        dist = 0;
-        mark = false;
+    Vertex() {
+        setDist(0);
+        setMark(false);
         edges = new ArrayList<>(0);
+    }
+
+    boolean getMark() {
+        return mark;
+    }
+
+    void setMark(boolean mark) {
+        this.mark = mark;
+    }
+
+    ArrayList<Integer> getEdges() {
+        return edges;
+    }
+
+    int getDist() {
+        return dist;
+    }
+
+    void setDist(int dist) {
+        this.dist = dist;
     }
 }
 
 class Tuple {
-    public final int dist, index;
+    private final int dist;
+    private final int index;
 
-    public Tuple(int dist, int index) {
+    Tuple(int dist, int index) {
         this.dist = dist;
         this.index = index;
+    }
+
+    int getDist() {
+        return dist;
+    }
+
+    int getIndex() {
+        return index;
     }
 }

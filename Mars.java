@@ -2,45 +2,56 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Mars {
+class Mars {
     private static ArrayList<Component> result;
     private static ArrayList<Integer> alone;
     private static boolean flag;
+    private static int n;
 
     public static void main(String[] args) {
         flag = true;
         result = new ArrayList<>(0);
         alone = new ArrayList<>(0);
-        Scanner scn = new Scanner(System.in);
-        int n = scn.nextInt();
-        scn.nextLine();
-        Vertex[] vertices = new Vertex[n];
-        for (int i = 0; i < n; i++) {
-            vertices[i] = new Vertex();
-            Scanner line = new Scanner(scn.nextLine());
-            for (int j = 0; j < n; j++) {
-                if (line.next().equals("+")) {
-                    vertices[i].edges.add(j);
-                }
-            }
-        }
-        DFS(vertices);
+        DFS(scanInput());
+        printAnswer();
+    }
+
+    private static void printAnswer() {
         if (flag) {
-            ArrayList<Integer> l = getAnswer(n);
-            l.sort((a, b) -> a - b);
-            l.forEach(i -> System.out.printf("%s ", i));
+            getAnswer(n)
+                    .stream()
+                    .sorted((a, b) -> a - b)
+                    .forEach(i -> System.out.printf("%s ", i));
         } else {
             System.out.println("No solution");
         }
+        System.out.println();
+    }
+
+    private static Vertex[] scanInput() {
+        Scanner in = new Scanner(System.in);
+        n = in.nextInt();
+        in.nextLine();
+        Vertex[] vertices = new Vertex[n];
+        for (int i = 0; i < n; i++) {
+            vertices[i] = new Vertex();
+            Scanner line = new Scanner(in.nextLine());
+            for (int j = 0; j < n; j++) {
+                if (line.next().equals("+")) {
+                    vertices[i].getEdges().add(j);
+                }
+            }
+        }
+        return vertices;
     }
 
     private static void DFS(Vertex[] vertices) {
         for (int i = 0; i < vertices.length; i++) {
             Vertex vertex = vertices[i];
-            if (vertex.mark == Vertex.Marks.WHITE) {
+            if (vertex.getMark() == Vertex.Marks.WHITE) {
                 Component c = new Component();
                 visitVertex(vertices, vertex, i, c);
-                if (!c.pluses.isEmpty()) {
+                if (!c.getPluses().isEmpty()) {
                     result.add(c);
                 }
             }
@@ -48,35 +59,35 @@ public class Mars {
     }
 
     private static void visitVertex(Vertex[] vertices, Vertex v, int vIndex, Component c) {
-        v.mark = Vertex.Marks.GRAY;
-        if (v.sign == Vertex.PLUS) {
-            if (v.edges.isEmpty()) {
+        v.setMark(Vertex.Marks.GRAY);
+        if (v.getSign()) {
+            if (v.getEdges().isEmpty()) {
                 alone.add(vIndex + 1);
             } else {
-                c.pluses.add(vIndex + 1);
+                c.getPluses().add(vIndex + 1);
             }
         } else {
-            c.minuses.add(vIndex + 1);
+            c.getMinuses().add(vIndex + 1);
         }
         for (Integer i :
-                v.edges) {
+                v.getEdges()) {
             Vertex u = vertices[i];
-            if (u.mark == Vertex.Marks.WHITE) {
-                u.sign = v.sign == Vertex.PLUS ? Vertex.MINUS : Vertex.PLUS;
+            if (u.getMark() == Vertex.Marks.WHITE) {
+                u.setSign(!v.getSign());
                 visitVertex(vertices, u, i, c);
             } else {
-                if (u.sign == v.sign) {
+                if (u.getSign() == v.getSign()) {
                     flag = false;
                     return;
                 }
             }
         }
-        v.mark = Vertex.Marks.BLACK;
+        v.setMark(Vertex.Marks.BLACK);
     }
 
     private static ArrayList<Integer> getAnswer(int n) {
         ArrayList<Integer> answer = new ArrayList<>(0);
-        int answerSize = result.stream().mapToInt(x -> x.pluses.size()).reduce(0, (r, x) -> r + x);
+        int answerSize = result.stream().mapToInt(x -> x.getPluses().size()).reduce(0, (r, x) -> r + x);
         if (answerSize < n / 2) {
             List<Integer> l = alone.subList(0, n / 2 - answerSize);
             answer.addAll(l);
@@ -84,13 +95,13 @@ public class Mars {
         }
         for (Component c :
                 result) {
-            if (c.pluses.size() > c.minuses.size() && alone.get(0) < c.pluses.get(0)) {
-                List<Integer> l = alone.subList(0, c.pluses.size() - c.minuses.size());
-                answer.addAll(c.minuses);
+            if (c.getPluses().size() > c.getMinuses().size() && alone.get(0) < c.getPluses().get(0)) {
+                List<Integer> l = alone.subList(0, c.getPluses().size() - c.getMinuses().size());
+                answer.addAll(c.getMinuses());
                 answer.addAll(l);
                 alone.removeAll(l);
             } else {
-                answer.addAll(c.pluses);
+                answer.addAll(c.getPluses());
             }
         }
         return answer;
@@ -98,31 +109,52 @@ public class Mars {
 }
 
 class Vertex {
-    public Marks mark;
-    public boolean sign;
-    public final ArrayList<Integer> edges;
-    public static final boolean PLUS, MINUS;
+    private final ArrayList<Integer> edges;
+    private Marks mark;
+    private boolean sign;
 
-    public enum Marks {WHITE, GRAY, BLACK}
-
-    static {
-        PLUS = true;
-        MINUS = false;
-    }
-
-    public Vertex() {
-        mark = Marks.WHITE;
-        sign = PLUS;
+    Vertex() {
+        setMark(Marks.WHITE);
+        setSign(true);
         edges = new ArrayList<>(0);
     }
+
+    Marks getMark() {
+        return mark;
+    }
+
+    void setMark(Marks mark) {
+        this.mark = mark;
+    }
+
+    boolean getSign() {
+        return sign;
+    }
+
+    void setSign(boolean sign) {
+        this.sign = sign;
+    }
+
+    ArrayList<Integer> getEdges() {
+        return edges;
+    }
+
+    enum Marks {WHITE, GRAY, BLACK}
 }
 
 class Component {
-    public final ArrayList<Integer> pluses;
-    public final ArrayList<Integer> minuses;
+    private final ArrayList<Integer> pluses, minuses;
 
-    public Component() {
+    Component() {
         pluses = new ArrayList<>(0);
         minuses = new ArrayList<>(0);
+    }
+
+    ArrayList<Integer> getPluses() {
+        return pluses;
+    }
+
+    ArrayList<Integer> getMinuses() {
+        return minuses;
     }
 }
